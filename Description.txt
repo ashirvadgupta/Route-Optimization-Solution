@@ -1,0 +1,70 @@
+Extract the attached .zip file.
+
+
+1.  Go to mysql cli.
+
+2.  Load the database using the attached spring_clean.sql file
+    and using the command:
+    "source <path of your sql file"
+    Ex. mysql> source C:/Users/user1/Desktop/ROS/spring_clean.sql
+    
+3. Verify the databases in your mysql server using the command 'SHOW DATABASES;' , you should be seeing spring_clean database.
+
+4. Verify the tables in the database using the commands.
+    "show databases;" - you should see spring_clean database.
+    "use spring_clean;"
+    "show tables;" - you should see 3 tables. (parameters_info_db, stops_info_db and travel_time_matrix_db)
+    
+    
+stops_info_db: 
+    - consists 195 rows (189 stops and 6 depots).
+    - columns:
+        - STOP_ID : 8 character unique stop id. 
+        - TIME_TO_COMPLETE_WORK: Total time to complete the task/work at each stop/customer location.
+        - EXPECTED_NOT_BEFORE: customer not expective before this time.
+        - EXPECTED_NOT_AFTER: customer not expective after this time.
+        
+travel_time_matrix_db:
+    - consists 36270 rows.
+    - missing rows corresponds to 9 stops.
+    - columns:
+        - FROM_STOP_ID : From STOP_ID/Depot.  
+        - TO_STOP_ID : To STOP_ID/Depot.
+        - TRAVEL_TIME : Travel time between stop/depot - stop/depot.
+        
+parameters_info_db:
+    - consists of 6 rows.
+    - columns:.
+        - MAX_STOPS_PER_ROUTE : Maximum stops threshold per route. (5/6/7)
+        - MIN_STOPS_PER_ROUTE : Minimum stops threshold per route. (3/4/5)
+        - MAX_ROUTE_TIME :  Maximum time (travel and job execution time) threshold per route. (660mins - 11hours)
+        - MAX_EARLY_TIMEWINDOW : Allowable time window and large violations window, if reaches early.
+        - MAX_LATE_TIMEWINDOW : Allowable time window and large violations window, if reaches late.
+        
+Approaches:
+Genetic Algorithm.
+
+Objective: Minimize the overall time.
+
+Constraints:
+1.  Total travel and job execution must not exceed 660mins for any route. 
+    Apply penalty if exceeds, 
+        1 - 60 mins - exceeded minutes + 10% of total route time
+        61 - 120 mins - 2 times the exceeded minutes + 20% of total route time
+        121 - 180 mins - 3 times the exceeded minutes + 30% of total route time
+        181 - 240 mins - 4 times the exceeded minutes + 40% of total route time ...
+		
+2. If any route has more/less than the stops threshold
+        1 stop - 10% of total route time
+        2 stops - 20% of total route time
+        3 stops - 30% of total route time...
+        
+3. If a vehicle reaches a customer before/after small time window (30 mins) - no penalty
+   with in small and large time window - 10% of total route time
+   beyond large time window 
+        1st 60mins - exceeded minutes + 10% of total route time
+        2nd 60mins - 2 times the exceeded minutes + 20% of total route time
+        ..
+
+4. Define the probabilities and covergence criterias.
+5. Minimize the overall program execution time	
